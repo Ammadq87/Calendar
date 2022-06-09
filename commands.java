@@ -3,11 +3,13 @@ package Calendar;
 import java.util.*;
 
 /* 
- * (1) New Event → event -n 'test'
+HAVE TO CHANGE ce to something else as a command terme
+
+ * (1) New Event → event ce 'test'
  *      - n = new
- *      - -n (mandatory)
- *      - value after -n is optional
- *          - if value not present after -n, new event is named 'New Event'
+ *      - ce (mandatory)
+ *      - value after ce is optional
+ *          - if value not present after ce, new event is named 'New Event'
  * 
  * (2) Add time to Event → event -t '1230-2100' 'Event'
  *      - t = time
@@ -15,18 +17,18 @@ import java.util.*;
  *          - time
  *              - value must be provided as <'xxxx-xxxx'>
  *          - event name  
- *              - if -n is before -t, then there is no need for event name 
- *                  - event -n 'event' -t 'xxxx-xxxx' 
+ *              - if ce is before -t, then there is no need for event name 
+ *                  - event ce 'event' -t 'xxxx-xxxx' 
  * (3) Add a date to the Event → event -d 'dd-mm-yyyy' 'Event'
  *      - d = date
  *      - 2 values
  *          - date
  *              - value must be provided as <'dd-mm-yyyy'>
  *          - event name
- *              - if -n is before -d, then there is no need for event name
- *                  - event -n 'event' -d 'dd-mm-yyyy'
+ *              - if ce is before -d, then there is no need for event name
+ *                  - event ce 'event' -d 'dd-mm-yyyy'
  * 
- * Conjunction of 1,2,3 → event -n 'Birthday' -d '07-07-2002' -t '0-1200'
+ * Conjunction of 1,2,3 → event ce 'Birthday' -d '07-07-2002' -t '0-1200'
  * 
  * (4) View the list of events in a day → ls 'dd-mm-yyyy'
  *      - ls = list
@@ -44,7 +46,7 @@ import java.util.*;
 public class commands {
 
     String command;
-    String flags[] = { "-n", "-d", "-t" };
+    String flags[] = { "ce", "-d", "-t" };
     List<event> list = new ArrayList<event>();
 
     public commands(String command) {
@@ -74,7 +76,7 @@ public class commands {
         else if (text[i].equalsIgnoreCase("-d") || text[i].equalsIgnoreCase("-t")) {
             int cnt = 0;
             for (int j = i - 1; j > 0; j--) {
-                if (text[j].equalsIgnoreCase("-n")) {
+                if (text[j].equalsIgnoreCase("ce")) {
                     cnt++;
                 }
             }
@@ -82,9 +84,9 @@ public class commands {
                 return false;
         }
 
-        else if (text[i].equalsIgnoreCase("-n")) {
+        else if (text[i].equalsIgnoreCase("ce")) {
             for (int j = i - 1; j > 0; j--) {
-                if (text[j].equalsIgnoreCase("-n") || text[j].equalsIgnoreCase("-d")
+                if (text[j].equalsIgnoreCase("ce") || text[j].equalsIgnoreCase("-d")
                         || text[j].equalsIgnoreCase("-t")) {
                     return false;
                 }
@@ -95,7 +97,7 @@ public class commands {
         int duplicates[] = new int[flags.length];
 
         for (int j = i + 1; j < text.length; j++) {
-            if (text[j].equalsIgnoreCase("-n")) {
+            if (text[j].equalsIgnoreCase("ce")) {
                 return false;
             } else if (text[j].equalsIgnoreCase(flags[1])) {
                 duplicates[1]++;
@@ -124,7 +126,7 @@ public class commands {
             if (text[i].length() <= 1)
                 return false;
 
-            if (text[i].equalsIgnoreCase("-n") || text[i].equalsIgnoreCase("-d") || text[i].equalsIgnoreCase("-t")) {
+            if (text[i].equalsIgnoreCase("ce") || text[i].equalsIgnoreCase("-d") || text[i].equalsIgnoreCase("-t")) {
                 if (!boundsCheck(i, text))
                     return false;
             }
@@ -140,7 +142,7 @@ public class commands {
         String text[] = command.split(" ");
 
         for (int i = 1; i < text.length; i++) {
-            if (text[i].equalsIgnoreCase("-n")) {
+            if (text[i].equalsIgnoreCase("ce")) {
                 String title = text[i + 1];
                 String time = null;
                 String date = null;
