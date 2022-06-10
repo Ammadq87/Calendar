@@ -2,51 +2,13 @@ package Calendar;
 
 import java.util.*;
 
-/* 
-HAVE TO CHANGE ce to something else as a command terme
-
- * (1) New Event → event ce 'test'
- *      - n = new
- *      - ce (mandatory)
- *      - value after ce is optional
- *          - if value not present after ce, new event is named 'New Event'
- * 
- * (2) Add time to Event → event -t '1230-2100' 'Event'
- *      - t = time
- *      - 2 values
- *          - time
- *              - value must be provided as <'xxxx-xxxx'>
- *          - event name  
- *              - if ce is before -t, then there is no need for event name 
- *                  - event ce 'event' -t 'xxxx-xxxx' 
- * (3) Add a date to the Event → event -d 'dd-mm-yyyy' 'Event'
- *      - d = date
- *      - 2 values
- *          - date
- *              - value must be provided as <'dd-mm-yyyy'>
- *          - event name
- *              - if ce is before -d, then there is no need for event name
- *                  - event ce 'event' -d 'dd-mm-yyyy'
- * 
- * Conjunction of 1,2,3 → event ce 'Birthday' -d '07-07-2002' -t '0-1200'
- * 
- * (4) View the list of events in a day → ls 'dd-mm-yyyy'
- *      - ls = list
- *      - 1 parameter (optional)
- *          - date
- *              - value must be provided as <'dd-mm-yyyy'>
- *          - no parameters
- *              - list current day events
- *      - Possible Combos:
- *              - ls '04-20-2020'
- *              - ls
- *  
- */
-
 public class commands {
 
     String command;
-    String flags[] = { "ce", "-d", "-t" };
+    String flags[] = { "ce", "-d", "-t", "ls" };
+    String commandList[] = { "ce", "ls" };
+    boolean printToScreen = false;
+    String print = "";
     List<event> list = new ArrayList<event>();
 
     public commands(String command) {
@@ -62,54 +24,73 @@ public class commands {
         return this.command.replaceAll("\\s{2,}", " ");
     }
 
-    private boolean boundsCheck(int i, String text[]) {
-        if (i == text.length - 1) {
-            return false;
+    // Verifies argument after command
+    private boolean verifyArgument(String text[], int i) {
+        if (text[i].equalsIgnoreCase("ls") && i == text.length - 1) {
+            return true;
         }
 
-        // Checks if value after flag is an actual title, not a garbage value
-        else if (!(i < text.length - 1 && (text[i + 1].charAt(0) == text[i + 1].charAt(text[i + 1].length() - 1)
-                && text[i + 1].charAt(0) == '\''))) {
-            return false;
+        return (i < text.length - 1 && (text[i + 1].charAt(0) == text[i + 1].charAt(text[i + 1].length() - 1)
+                && text[i + 1].charAt(0) == '\''));
+    }
+
+    private boolean isCommand(String text) {
+        if (text.length() >= 1) {
+            if (text.charAt(0) == '\'')
+                return false;
+            else if (text.charAt(0) == '-')
+                return false;
         }
 
-        else if (text[i].equalsIgnoreCase("-d") || text[i].equalsIgnoreCase("-t")) {
-            int cnt = 0;
-            for (int j = i - 1; j > 0; j--) {
-                if (text[j].equalsIgnoreCase("ce")) {
+        return true;
+    }
+
+    private boolean isDuplicateOrUnknownValue(String text[], int i) {
+        int cnt = 0;
+
+        if (isCommand(text[i])) {
+            for (int j = i + 1; j < text.length; j++) {
+                if (isCommand(text[j])) {
+                    return true;
+                }
+            }
+            return !(i == 1);
+        }
+
+        else {
+            for (int j = 1; j < text.length; j++) {
+                if (j != i && text[j].equalsIgnoreCase(text[i])) {
+                    return true;
+                }
+
+                if (isCommand(text[j]) && j != i) {
                     cnt++;
                 }
+
             }
-            if (cnt > 1)
-                return false;
+
+            // If the count is greater than 1, there is more than 1 command
+            return cnt > 1;
         }
 
-        else if (text[i].equalsIgnoreCase("ce")) {
-            for (int j = i - 1; j > 0; j--) {
-                if (text[j].equalsIgnoreCase("ce") || text[j].equalsIgnoreCase("-d")
-                        || text[j].equalsIgnoreCase("-t")) {
-                    return false;
-                }
-            }
+    }
+
+    private boolean boundsCheck(int i, String text[]) {
+        if (!text[i].equalsIgnoreCase("ls") && i == text.length - 1) {
+            System.out.println("1");
+            return false;
         }
 
-        // Keeps track of duplicate flags
-        int duplicates[] = new int[flags.length];
+        if (isDuplicateOrUnknownValue(text, i)) {
+            System.out.println("2");
 
-        for (int j = i + 1; j < text.length; j++) {
-            if (text[j].equalsIgnoreCase("ce")) {
-                return false;
-            } else if (text[j].equalsIgnoreCase(flags[1])) {
-                duplicates[1]++;
-                if (duplicates[1] >= 2) {
-                    return false;
-                }
-            } else if (text[j].equalsIgnoreCase(flags[2])) {
-                duplicates[2]++;
-                if (duplicates[2] >= 2) {
-                    return false;
-                }
-            }
+            return false;
+        }
+
+        if (isCommand(text[i]) && !verifyArgument(text, i)) {
+            System.out.println("3");
+
+            return false;
         }
 
         return true;
@@ -122,11 +103,12 @@ public class commands {
             return false;
 
         for (int i = 1; i < text.length; i++) {
-
             if (text[i].length() <= 1)
                 return false;
 
-            if (text[i].equalsIgnoreCase("ce") || text[i].equalsIgnoreCase("-d") || text[i].equalsIgnoreCase("-t")) {
+            // Needs a better way of identifying commands
+            if (text[i].equalsIgnoreCase("ls") || text[i].equalsIgnoreCase("ce") || text[i].equalsIgnoreCase("-d")
+                    || text[i].equalsIgnoreCase("-t")) {
                 if (!boundsCheck(i, text))
                     return false;
             }
@@ -157,6 +139,11 @@ public class commands {
                 }
                 this.list.add(newEvent(title, date, time));
                 return true;
+            }
+
+            if (text[i].equalsIgnoreCase("ls")) {
+                this.printToScreen = true;
+                this.print += "Hi\n";
             }
 
         }
