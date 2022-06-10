@@ -23,6 +23,12 @@ public class app {
                 if (!c.verifyCommand())
                     System.out.println("Command <" + cmd + "> could not be executed");
             }
+
+            if (c.printToScreen) {
+                System.out.println(c.print);
+                c.printToScreen = false;
+            }
+
             print(c.getListOfEvents());
             cmd = input.nextLine();
         }
