@@ -1,17 +1,21 @@
-package Calendar;
+package JDBC;
 
 public class event {
     String name = "Unknown Event";
     String date = "Unknown Date";
     int startTime, endTime;
+    int uid = 1;
 
-    public event(String n) {
-        this.name = n;
+    public event(String n, int id) {
+        this.name = sanitizeString(n);
+        this.uid = id;
     }
 
-    public event(String n, String x) {
+    public event(String n, String x, int id) {
 
-        this.name = n;
+        this.name = sanitizeString(n);
+        x = sanitizeString(x);
+        this.uid = id;
 
         int cnt = 0;
         for (int i = 0; i < x.length(); i++) {
@@ -27,22 +31,32 @@ public class event {
         // x is time
         else {
             cnt = x.indexOf('-');
-            this.startTime = Integer.parseInt(x.substring(1, cnt));
-            this.endTime = Integer.parseInt(x.substring(cnt + 1, x.length() - 1));
+            this.startTime = Integer.parseInt(x.substring(0, cnt));
+            this.endTime = Integer.parseInt(x.substring(cnt + 1, x.length()));
         }
     }
 
-    public event(String n, String d, String t) {
-        this.name = n;
-        this.date = d;
+    public event(String n, String d, String t, int id) {
+        this.name = sanitizeString(n);
+        this.date = sanitizeString(d);
+        t = sanitizeString(t);
+        this.uid = id;
 
         int dash = t.indexOf('-');
-        this.startTime = Integer.parseInt(t.substring(1, dash));
-        this.endTime = Integer.parseInt(t.substring(dash + 1, t.length() - 1));
+        this.startTime = Integer.parseInt(t.substring(0, dash));
+        this.endTime = Integer.parseInt(t.substring(dash + 1, t.length()));
+    }
+
+    public String sanitizeString(String text) {
+        return text.substring(1, text.length() - 1);
     }
 
     public String eventToString() {
-        return this.name + " from " + this.startTime + " to " + this.endTime + " on " + this.date;
+        return "(" + this.uid + ") " + this.name + " from " + getTime() + " on " + this.date;
+    }
+
+    public String getTime() {
+        return "[" + this.startTime + " - " + this.endTime + "]";
     }
 
 }
