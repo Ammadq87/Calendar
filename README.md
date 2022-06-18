@@ -1,6 +1,6 @@
 # List of Current Commands
 
-### Create an Event
+### Create an Event ✔️
 
 - Use `event ce 'Birthday'` to create a new event
 - When creating an event, a name for an event must be provided
