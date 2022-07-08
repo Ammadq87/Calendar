@@ -1,7 +1,6 @@
 package MainApp;
 
 import java.util.*;
-import java.sql.*;
 
 public class app {
 
@@ -11,18 +10,15 @@ public class app {
         new app();
     }
 
-    public Connection con = null;
-
     public app() {
         Scanner input = new Scanner(System.in);
-        messageDisplay.outputMessage("Enter Command. Type -h for help", 'r');
+        messageDisplay.outputMessage(messageDisplay.getMessage("lblIntro"), 'r');
         String cmd = input.nextLine();
 
         Command c = new Command(cmd);
 
         while (!cmd.equals("-q")) {
             if (!c.isCommandValid()) {
-                messageDisplay.outputMessage("<error: " + c.errorMessage + " > ", 'w');
             } else {
                 c.executeCommand();
             }

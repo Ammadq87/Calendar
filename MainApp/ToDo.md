@@ -11,6 +11,8 @@
 
 ## Command.java
 
+- [Bug]: Date error message appears when no date is supplied -> There should be no error messages (verifyDateInput)
+
 ## CreateEvent.java
 
 - [Dev]: When null time values are submitted, create auto-generated time-values to insert into db
