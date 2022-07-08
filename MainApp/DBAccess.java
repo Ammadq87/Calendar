@@ -11,7 +11,6 @@ public class DBAccess {
     Messages m = new Messages();
     Connection con = null;
     int currentID = 1;
-    String tables[];
 
     public DBAccess() {
         try {
