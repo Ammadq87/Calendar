@@ -13,7 +13,7 @@
 
 ## CreateEvent.java
 
-- [Dev]: finish createQuery method. After created
+- [Dev]: When null time values are submitted, create auto-generated time-values to insert into db
 
 ## DBAccess.java
 
