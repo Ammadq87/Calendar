@@ -1,13 +1,9 @@
 package MainApp;
 
-public class Command {
-
+public class Command extends DBAccess {
     String command;
     String flags[] = { "-d", "-t" };
     String listOfCommands[] = { "ce", "ls", "rm" };
-    String errorCodes[] = { "Command not found", "Invalid Date", "Invalid Time", "Invalid Parameter",
-            "Non-numerical Value Detected", "Error" };
-    String errorMessage = errorCodes[errorCodes.length - 1];
 
     public Command() {
 
@@ -65,8 +61,10 @@ public class Command {
         }
 
         for (int i = 1; i < text.length; i++) {
-            if (text[i].length() <= 1)
+            if (text[i].length() <= 1) {
+                m.outputMessage(m.getErrorMessage("lblCommandNotFound", text[i]), 'e');
                 return false;
+            }
 
             if (isFlag(text[i]) || isCommand(text[i])) {
                 if (!check(text, i)) {
@@ -80,18 +78,17 @@ public class Command {
 
     public boolean check(String text[], int i) {
         if (!text[i].equalsIgnoreCase("ls") && i == text.length - 1) {
-            System.out.println("1");
+            m.outputMessage(m.getErrorMessage("lblCommandNotFound", text[i]), 'e');
             return false;
         }
 
         if (isDuplicateOrUnknownValue(text, i)) {
-            System.out.println("2");
-
+            m.outputMessage(m.getErrorMessage("lblDuplicateOrUnknownValue", text[i]), 'e');
             return false;
         }
 
         if ((isCommand(text[i]) || isFlag(text[i])) && !verifyArgument(text, i)) {
-            System.out.println("3");
+            m.outputMessage(m.getErrorMessage("lblInvalidArgument", null), 'e');
             return false;
         }
 
@@ -118,7 +115,8 @@ public class Command {
                 return true;
             }
         } catch (StringIndexOutOfBoundsException e) {
-            errorMessage = errorCodes[errorCodes.length - 1];
+            m.outputMessage(m.getErrorMessage(null, null), 'e');
+            e.printStackTrace();
             return false;
         }
         return false;
@@ -127,7 +125,7 @@ public class Command {
     public boolean verifyTimeInput(String argument) {
         // Should work without this
         if (argument.length() != 9) {
-            this.errorMessage = this.errorCodes[2];
+            // m.outputMessage(m.getErrorMessage("lblInvalidTime", null), 'e');
             return false;
         }
 
@@ -137,16 +135,18 @@ public class Command {
 
             if (!((startTime <= endTime) && (0 <= startTime && startTime <= 2359)
                     && (0 <= endTime && endTime <= 2359))) {
-                this.errorMessage = this.errorCodes[2];
+                m.outputMessage(m.getErrorMessage("lblInvalidTime", null), 'e');
                 return false;
             }
         } catch (NumberFormatException e) {
-            this.errorMessage = this.errorCodes[4];
+            m.outputMessage(m.getErrorMessage("lblNonNumerical", null), 'e');
             return false;
         }
         return true;
     }
 
+    // ! Fix Verification of Date input -> Error message appears when no date is
+    // ! supplied -> no error message should appear
     public boolean verifyDateInput(String argument) {
         int values[] = new int[3];
         int cnt = 0;
@@ -163,14 +163,14 @@ public class Command {
                 }
 
             } catch (NumberFormatException e) {
-                this.errorMessage = this.errorCodes[4];
+                m.outputMessage(m.getErrorMessage("lblNonNumerical", null), 'e');
                 return false;
             }
         }
 
         if (!((1 <= values[0] && values[0] <= 12) && (1 <= values[1] && values[1] <= 31)
                 && (2022 <= values[2] && values[2] <= 3022))) {
-            this.errorMessage = this.errorCodes[1];
+            m.outputMessage(m.getErrorMessage("lblInvalidDate", null), 'e');
             return false;
         }
 
