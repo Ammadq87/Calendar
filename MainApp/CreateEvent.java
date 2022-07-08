@@ -5,7 +5,6 @@ import java.util.Arrays;
 import javax.lang.model.util.ElementScanner6;
 
 public class CreateEvent extends Command {
-    Messages messages = new Messages();
     static int id = 7;
     String parameters[] = new String[3]; // name, date/time
     Event e = new Event();
@@ -27,8 +26,7 @@ public class CreateEvent extends Command {
             }
         }
 
-        DBAccess db = new DBAccess();
-        db.executeQuery(createQuery("events"));
+        super.executeQuery(createQuery("events"));
     }
 
     public String createQuery(String table) {
