@@ -8,7 +8,7 @@ import java.sql.Statement;
 import java.util.*;
 
 public class DBAccess {
-    Messages messages = new Messages();
+    Messages m = new Messages();
     Connection con = null;
     int currentID = 1;
     String tables[];
@@ -28,7 +28,7 @@ public class DBAccess {
             }
 
         } catch (SQLException ex) {
-            messages.outputMessage("<error: Could not connect to MySQL database > ", 'e');
+            m.outputMessage(m.getErrorMessage("lblFailedConnection", null), 'e');
             ex.printStackTrace();
         }
     }
@@ -41,9 +41,9 @@ public class DBAccess {
         try {
             Statement s = con.createStatement();
             s.executeUpdate(query);
-            messages.outputMessage("Success ", 's');
+            m.outputMessage(m.getMessage("lblSavedSuccessfully"), 's');
         } catch (SQLException ex) {
-            messages.outputMessage("<error: Could not execute query> ", 'e');
+            m.outputMessage(m.getErrorMessage("lblQueryFailed", query), 'e');
             ex.printStackTrace();
         }
     }
@@ -58,7 +58,7 @@ public class DBAccess {
             ResultSet r = s.executeQuery(query);
             return printResults(r, columns);
         } catch (SQLException ex) {
-            messages.outputMessage("<error: Could not execute command > ", 'e');
+            m.outputMessage(m.getErrorMessage("lblCommandFailed", query), 'e');
             ex.printStackTrace();
         }
 
@@ -97,7 +97,7 @@ public class DBAccess {
             }
 
         } catch (Exception e) {
-            messages.outputMessage("<error: Could not print results > ", 'e');
+            m.outputMessage(m.getErrorMessage("lblPrintResultsFailed", null), 'e');
             e.printStackTrace();
         }
 
