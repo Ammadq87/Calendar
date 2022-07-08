@@ -1,6 +1,6 @@
 package MainApp;
 
-import java.util.Arrays;
+import java.io.IOException;
 
 public class Command {
 
@@ -105,19 +105,24 @@ public class Command {
             return true;
         }
 
-        String argument = getArgument(text, i + 1);
-        if (argument.charAt(0) == '\'' && argument.charAt(argument.length() - 1) == '\'') {
-            argument = sanitizeArgument(argument);
+        try {
+            String argument = getArgument(text, i + 1);
+            if (argument.charAt(0) == '\'' && argument.charAt(argument.length() - 1) == '\'') {
+                argument = sanitizeArgument(argument);
 
-            if (text[i].equalsIgnoreCase("-d")) {
-                return verifyDateInput(argument);
+                if (text[i].equalsIgnoreCase("-d")) {
+                    return verifyDateInput(argument);
+                }
+
+                else if (text[i].equalsIgnoreCase("-t")) {
+                    return verifyTimeInput(argument);
+                }
+
+                return true;
             }
-
-            else if (text[i].equalsIgnoreCase("-t")) {
-                return verifyTimeInput(argument);
-            }
-
-            return true;
+        } catch (StringIndexOutOfBoundsException e) {
+            errorMessage = errorCodes[errorCodes.length - 1];
+            return false;
         }
         return false;
     }
