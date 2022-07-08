@@ -5,6 +5,8 @@ import java.sql.*;
 
 public class app {
 
+    Messages messageDisplay = new Messages();
+
     public static void main(String args[]) {
         new app();
     }
@@ -13,14 +15,14 @@ public class app {
 
     public app() {
         Scanner input = new Scanner(System.in);
-        System.out.println("Enter Command. Type -h for help");
+        messageDisplay.outputMessage("Enter Command. Type -h for help", 'r');
         String cmd = input.nextLine();
 
         Command c = new Command(cmd);
 
         while (!cmd.equals("-q")) {
             if (!c.isCommandValid()) {
-                System.out.println("<error: " + c.errorMessage + " >");
+                messageDisplay.outputMessage("<error: " + c.errorMessage + " > ", 'w');
             } else {
                 c.executeCommand();
             }

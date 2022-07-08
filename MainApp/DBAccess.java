@@ -8,7 +8,7 @@ import java.sql.Statement;
 import java.util.*;
 
 public class DBAccess {
-
+    Messages messages = new Messages();
     Connection con = null;
     int currentID = 1;
     String tables[];
@@ -23,33 +23,42 @@ public class DBAccess {
             con = DriverManager.getConnection(url, username, password);
 
             if (con != null) {
-                System.out.println("Successfully connected to MySQL database test");
+                List<String[]> l = getResultsFromQuery("select eventID from events order by eventID desc", "eventID-i");
+                this.currentID = Integer.parseInt(l.get(0)[0]) + 1;
             }
 
         } catch (SQLException ex) {
-            System.out.println("<error: An error occurred while connecting MySQL database >");
+            messages.outputMessage("<error: Could not connect to MySQL database > ", 'e');
             ex.printStackTrace();
         }
     }
 
     public void executeQuery(String query) {
+        if (query.contains("{0}")) {
+            query = query.replace("{0}", "" + this.currentID);
+        }
+
         try {
             Statement s = con.createStatement();
-            s.execute(query);
-            System.out.println("\nDone ------------\n");
+            s.executeUpdate(query);
+            messages.outputMessage("Success ", 's');
         } catch (SQLException ex) {
-            System.out.println("<error: Could not execute command >");
+            messages.outputMessage("<error: Could not execute query> ", 'e');
             ex.printStackTrace();
         }
     }
 
     public List<String[]> getResultsFromQuery(String query, String... columns) {
+        if (query.contains("{0}")) {
+            query = query.replace("{0}", "" + this.currentID);
+        }
+
         try {
             Statement s = con.createStatement();
             ResultSet r = s.executeQuery(query);
             return printResults(r, columns);
         } catch (SQLException ex) {
-            System.out.println("<error: Could not execute command >");
+            messages.outputMessage("<error: Could not execute command > ", 'e');
             ex.printStackTrace();
         }
 
@@ -88,7 +97,7 @@ public class DBAccess {
             }
 
         } catch (Exception e) {
-            System.out.println("<error: Could not print results>");
+            messages.outputMessage("<error: Could not print results > ", 'e');
             e.printStackTrace();
         }
 
