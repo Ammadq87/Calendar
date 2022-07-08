@@ -1,5 +1,9 @@
+
 package MainApp;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.time.LocalDateTime;
 /* Event Hierarchy:
  * -> CLASS event
  * 		-> handles basic information about the event
@@ -13,7 +17,7 @@ public class Event {
     String name = "Unknown Event";
     String date = "Unknown Date";
     int _date[] = new int[3];
-    int startTime, endTime;
+    int startTime, endTime = 2359;
     int uid = 1;
 
     public Event(String n, int id) {
@@ -58,7 +62,14 @@ public class Event {
     }
 
     public Event() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        LocalDateTime now = LocalDateTime.now();
 
+        String defaultValues[] = dtf.format(now).split(" ");
+        String dates[] = defaultValues[0].split("/");
+        for (int i = 0; i < dates.length; i++) {
+            this._date[i] = Integer.parseInt(dates[i]);
+        }
     }
 
     public void setName(String name) {
