@@ -8,6 +8,7 @@
   - `event ce 'Birthday' -d '07-07-2002' -t '0000-2359'`
   - `event ce 'Birthday' -d '07-07-2002'`
   - `event ce 'Birthday' -t '0000-2359'`
+- The name of all-day events will appear as `Birthday <All-Day>`
 
 ### List Events
 
