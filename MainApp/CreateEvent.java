@@ -5,7 +5,8 @@ import java.util.Arrays;
 import javax.lang.model.util.ElementScanner6;
 
 public class CreateEvent extends Command {
-    static int id = 6;
+    Messages messages = new Messages();
+    static int id = 7;
     String parameters[] = new String[3]; // name, date/time
     Event e = new Event();
 
@@ -14,56 +15,34 @@ public class CreateEvent extends Command {
     }
 
     public void execute() {
-        // System.out.println("\nCreating New Event...");
         e.setName(this.parameters[0]);
 
         for (int i = 1; i < this.parameters.length; i++) {
-            if (isTime(this.parameters[i])) {
+            if (this.parameters[i] != null && verifyTimeInput(this.parameters[i])) {
                 setTimeParameter(this.parameters[i]);
             }
 
-            if (this.parameters[i] != null && !isTime(this.parameters[i])) {
+            if (this.parameters[i] != null && !verifyTimeInput(this.parameters[i])) {
                 setDateParameter(this.parameters[i]);
             }
         }
 
-        // System.out.println(e.eventToString());
         DBAccess db = new DBAccess();
         db.executeQuery(createQuery("events"));
-        // db.insertData("events", e);
-        // Submit to db
     }
 
     public String createQuery(String table) {
         String query = "INSERT INTO " + table + " VALUES (";
-        String value = "";
+        String value = (this.e.startTime == 0 && this.e.endTime == 2359)
+                ? "{0}, \"" + this.e.name + " <All-Day>\", {1}, {2});"
+                : "{0}, \"" + this.e.name + "\", {1}, {2});";
 
-        boolean fullParameterList = true;
-        for (int i = 0; i < this.parameters.length; i++) {
-            if (this.parameters[i] == null)
-                fullParameterList = false;
-        }
+        value = value.replace("{2}",
+                "\"" + e.getDate() + "\", " + e._date[0] + ", " + e._date[1] + ", " + e._date[2]);
+        value = value.replace("{1}", e.startTime + ", " + e.endTime);
 
-        if (!fullParameterList) {
+        query += value;
 
-        } else {
-            value += (this.id++) + ", ";
-            value += "\"" + this.e.name + "\", ";
-
-            if (verifyTimeInput(this.parameters[1]) || verifyTimeInput(this.parameters[2]))
-                value += e.startTime + ", " + e.endTime + ", ";
-            else
-                value += "NULL, ";
-
-            if (verifyDateInput(this.parameters[1]) || verifyDateInput(this.parameters[2]))
-                value += "\"" + e.getDate() + "\", " + e._date[0] + ", " + e._date[1] + ", " + e._date[2] + ");";
-            else
-                value += "NULL);";
-
-            query += value;
-        }
-
-        System.out.println(query);
         return query;
     }
 
@@ -80,12 +59,6 @@ public class CreateEvent extends Command {
         int start = Integer.parseInt(time.substring(0, time.indexOf('-')));
         int end = Integer.parseInt(time.substring(time.indexOf('-') + 1, time.length()));
         e.setTimes(start, end);
-    }
-
-    private boolean isTime(String time) {
-        if (time == null || time == "")
-            return false;
-        return time.length() == 9;
     }
 
 }
