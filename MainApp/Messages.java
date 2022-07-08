@@ -1,6 +1,8 @@
 package MainApp;
+
 // A test for merging
 public class Messages {
+    private String message = "lblIntro";
 
     public Messages() {
 
@@ -24,6 +26,63 @@ public class Messages {
                 System.out.println(Color.RESET);
                 break;
         }
+    }
+
+    public String getCurrentMessage(String lbl) {
+        message = getMessage(lbl);
+        return message;
+    }
+
+    public String getErrorMessage(String lbl, String opt) {
+
+        if (lbl == null) {
+            return "<Error>";
+        }
+
+        if (opt != null) {
+            opt = " \"" + opt + "\" ";
+        } else {
+            opt = " ";
+        }
+
+        String labels[][] = {
+                { "lblCommandNotFound", "Command" + opt + "Not Found" },
+                { "lblInvalidDate", "Invalid Date" },
+                { "lblInvalidTime", "Invalid Time" },
+                { "lblInvalidParameter", "Invalid Parameter" },
+                { "lblInvalidArgument", "Invalid Arguemnt" },
+                { "lblNonNumerical", "Non-numerical Value Provided" },
+                { "lblFailedConnection", "Failed to Connect to MySql Database" },
+                { "lblQueryFailed", "Failed to Execute Query:" + opt },
+                { "lblCommandFailed", "Failed to Execute Command:" + opt },
+                { "lblPrintResultsFailed", "Failed to Print Results:" + opt },
+                { "lblDuplicateOrUnknownValue", "Duplucate or Unknown Value/Parameter Entered" }
+
+        };
+
+        for (int i = 0; i < labels.length; i++) {
+            if (lbl.equals(labels[i][0])) {
+                return "<Error: " + labels[i][1] + ">";
+            }
+        }
+
+        return "<Error!>";
+    }
+
+    public String getMessage(String lbl) {
+        String labels[][] = {
+                { "lblIntro", "Enter Command. Type -h for help" },
+                { "lblSuccess", "Success" },
+                { "lblSavedSuccessfully", "Value(s) Saved Successfully" }
+        };
+
+        for (int i = 0; i < labels.length; i++) {
+            if (lbl.equals(labels[i][0])) {
+                return "<" + labels[i][1] + ">";
+            }
+        }
+
+        return "Hello...";
     }
 
 }
