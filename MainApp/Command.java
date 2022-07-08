@@ -1,7 +1,5 @@
 package MainApp;
 
-import java.io.IOException;
-
 public class Command {
 
     String command;
@@ -104,7 +102,6 @@ public class Command {
         if (text[i].equalsIgnoreCase("ls") && i == text.length - 1) {
             return true;
         }
-
         try {
             String argument = getArgument(text, i + 1);
             if (argument.charAt(0) == '\'' && argument.charAt(argument.length() - 1) == '\'') {
