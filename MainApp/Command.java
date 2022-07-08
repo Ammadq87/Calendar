@@ -104,20 +104,24 @@ public class Command {
         if (text[i].equalsIgnoreCase("ls") && i == text.length - 1) {
             return true;
         }
+        try {
+            String argument = getArgument(text, i + 1);
+            if (argument.charAt(0) == '\'' && argument.charAt(argument.length() - 1) == '\'') {
+                argument = sanitizeArgument(argument);
 
-        String argument = getArgument(text, i + 1);
-        if (argument.charAt(0) == '\'' && argument.charAt(argument.length() - 1) == '\'') {
-            argument = sanitizeArgument(argument);
+                if (text[i].equalsIgnoreCase("-d")) {
+                    return verifyDateInput(argument);
+                }
 
-            if (text[i].equalsIgnoreCase("-d")) {
-                return verifyDateInput(argument);
-            }
+                else if (text[i].equalsIgnoreCase("-t")) {
+                    return verifyTimeInput(argument);
+                }
 
-            else if (text[i].equalsIgnoreCase("-t")) {
-                return verifyTimeInput(argument);
-            }
-
-            return true;
+                return true;
+            } 
+        } catch (StringIndexOutOfBoundsException e){
+            errorMessage = errorCodes[errorCodes.length - 1];
+            return false;
         }
         return false;
     }
