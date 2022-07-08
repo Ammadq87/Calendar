@@ -22,7 +22,7 @@ public class CreateEvent extends Command {
                 setTimeParameter(this.parameters[i]);
             }
 
-            if (this.parameters[i] != null && !verifyDateInput(this.parameters[i])) {
+            if (this.parameters[i] != null && verifyDateInput(this.parameters[i])) {
                 setDateParameter(this.parameters[i]);
             }
         }
