@@ -1,5 +1,5 @@
 package MainApp;
-
+// A test for merging
 public class Messages {
 
     public Messages() {
