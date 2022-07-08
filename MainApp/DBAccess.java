@@ -25,9 +25,6 @@ public class DBAccess {
             if (con != null) {
                 List<String[]> l = getResultsFromQuery("select eventID from events order by eventID desc", "eventID-i");
                 this.currentID = Integer.parseInt(l.get(0)[0]) + 1;
-                // for (String[] s : l) {
-                // System.out.println(Arrays.toString(s));
-                // }
             }
 
         } catch (SQLException ex) {
