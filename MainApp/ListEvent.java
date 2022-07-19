@@ -1,15 +1,58 @@
 package MainApp;
 
-public class ListEvent {
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
+
+public class ListEvent extends Command {
 
     String parameters[]; // (1 or 2) date(s), (1 or 2) time(s)
+
+    /*
+     * 
+     * [Date: 07-07-2022]
+     * 
+     * [10:00] [Umer Bday]
+     * | |
+     * | |
+     * | ______ V ________
+     * [11:00]
+     * |
+     * | [Eid Prayer]
+     * | |
+     * [12:00] |
+     * | |
+     * | _______ V ________
+     * | [Lunch Date]
+     * [13:00] _______ V ________
+     * | |
+     * | |
+     * | |
+     * [14:00]
+     * 
+     * 
+     * [15:00]
+     * 
+     * 
+     * 
+     */
+
+    Event e = new Event();
 
     public ListEvent(String parameters[]) {
         this.parameters = parameters;
     }
 
     public void execute() {
-        // String query = getQuery(this.parameters);
+        List<String[]> l = super.getResultsFromQuery(getQuery(parameters, "events", null), "name-s", "startTime-i",
+                "endTime-i", "eventDate-s");
+        for (String s[] : l) {
+            for (int i = 0; i < s.length; i++) {
+                System.out.print(s[i] + " | ");
+            }
+            System.out.println("");
+        }
     }
 
     /*
@@ -19,26 +62,16 @@ public class ListEvent {
      * Case #4: p[].length is 2-3 (time and date interval)
      */
 
-    public String getQuery(String parameters[], String table) {
+    public String getQuery(String parameters[], String table, String columns) {
         String query = "SELECT * FROM " + table;
 
-        if (parameters.length == 0) {
-            return query;
+        // If no parameters provided, output current day's events
+        if (parameters[0] == null && parameters[1] == null) {
+            query += " WHERE month = " + this.e._date[0] + " AND day = " + this.e._date[1] + " AND year = "
+                    + this.e._date[2];
         }
 
-        query += " WHERE ";
-
-        for (int i = 0; i < parameters.length; i++) {
-            if (isDate(parameters[i])) {
-                query += appendDate(parameters[i]);
-            }
-
-            if (isTime(parameters[i])) {
-                // query += appendTime(parameters[i]);
-            }
-        }
-
-        return null;
+        return query + ";";
     }
 
     private String appendDate(String date) {

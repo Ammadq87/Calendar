@@ -111,4 +111,19 @@ public class Event {
         return this._date[0] + "-" + this._date[1] + "-" + this._date[2];
     }
 
+    public int getHour(boolean start) {
+        if (start) {
+            return this.startTime / 100;
+        }
+        return this.endTime / 100;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public int[] getDateValues() {
+        return this._date;
+    }
+
 }

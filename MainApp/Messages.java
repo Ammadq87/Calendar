@@ -11,19 +11,20 @@ public class Messages {
     public void outputMessage(String message, char type) {
         switch (type) {
             case 'e':
-                System.out.print(Color.RED);
+                System.out.print(Color.RED_BOLD_BRIGHT);
+                System.out.print(Color.RED_UNDERLINED);
                 System.out.println(message);
-                System.out.println(Color.RESET);
+                System.out.print(Color.RESET);
                 break;
             case 's':
-                System.out.print(Color.GREEN);
+                System.out.print(Color.GREEN_BOLD_BRIGHT);
                 System.out.println(message);
-                System.out.println(Color.RESET);
+                System.out.print(Color.RESET);
                 break;
             case 'r':
-                System.out.print(Color.BLUE);
+                System.out.print(Color.BLUE_BOLD_BRIGHT);
                 System.out.println(message);
-                System.out.println(Color.RESET);
+                System.out.print(Color.RESET);
                 break;
         }
     }
@@ -35,8 +36,8 @@ public class Messages {
 
     public String getErrorMessage(String lbl, String opt) {
 
-        if (lbl == null) {
-            return "<Error>";
+        if (lbl == null || lbl.equals("")) {
+            return "> Unknown Error...";
         }
 
         if (opt != null) {
@@ -62,11 +63,11 @@ public class Messages {
 
         for (int i = 0; i < labels.length; i++) {
             if (lbl.equals(labels[i][0])) {
-                return "<Error: " + labels[i][1] + ">";
+                return "> Error: " + labels[i][1];
             }
         }
 
-        return "<Error!>";
+        return "> Unknwon Error...";
     }
 
     public String getMessage(String lbl) {
@@ -78,11 +79,11 @@ public class Messages {
 
         for (int i = 0; i < labels.length; i++) {
             if (lbl.equals(labels[i][0])) {
-                return "<" + labels[i][1] + ">";
+                return "> " + labels[i][1];
             }
         }
 
-        return "Hello...";
+        return "> Hello...";
     }
 
 }

@@ -13,6 +13,7 @@ public class app {
     public app() {
         Scanner input = new Scanner(System.in);
         messageDisplay.outputMessage(messageDisplay.getMessage("lblIntro"), 'r');
+        System.out.print("> ");
         String cmd = input.nextLine();
 
         Command c = new Command(cmd);
@@ -22,7 +23,8 @@ public class app {
             } else {
                 c.executeCommand();
             }
-
+            messageDisplay.outputMessage("Failed to Execute Command", 't');
+            System.out.print("> ");
             cmd = input.nextLine();
             c.setCommand(cmd);
         }

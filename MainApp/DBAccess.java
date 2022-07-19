@@ -69,11 +69,19 @@ public class DBAccess {
         List<String[]> l = new ArrayList<String[]>();
         try {
             while (r.next()) {
-                String result[] = new String[columns.length];
+                String result[] = new String[columns.length == 0 ? 1 : columns.length];
+
                 int i = 0;
+
                 for (String s : columns) {
-                    char type = s.charAt(s.indexOf('-') + 1);
-                    s = s.substring(0, s.indexOf('-'));
+
+                    char type = ' ';
+
+                    if (s.indexOf('-') != -1) {
+                        type = s.charAt(s.indexOf('-') + 1);
+                        s = s.substring(0, s.indexOf('-'));
+                    }
+
                     switch (type) {
                         case 'i':
                             result[i++] = "" + r.getInt(s);
@@ -87,9 +95,7 @@ public class DBAccess {
                         case 's':
                             result[i++] = r.getString(s);
                             break;
-                        default:
-                            result[i++] = "NULL";
-                            break;
+
                     }
                 }
                 l.add(result);

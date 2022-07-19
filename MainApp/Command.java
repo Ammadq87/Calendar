@@ -1,5 +1,7 @@
 package MainApp;
 
+import java.util.regex.Pattern;
+
 public class Command extends DBAccess {
     String command;
     String flags[] = { "-d", "-t" };
@@ -19,6 +21,7 @@ public class Command extends DBAccess {
         this.command = c;
     }
 
+    // Gets rid of extra spaces
     public void sanitizeCommand(String c) {
         c.replaceAll("\\s{2,}", " ");
     }
@@ -34,22 +37,43 @@ public class Command extends DBAccess {
     }
 
     private void createCommand(String text[], int i) {
-        // fix this to tackle when name arg is more than 1 word
+        String parameters[];
+        int cnt = 0;
         if (text[i].equals("ce")) {
-
-            String parameters[] = new String[3];
+            parameters = new String[3];
             parameters[0] = sanitizeArgument(getArgument(text, i + 1));
-            int cnt = 1;
-
+            cnt = 1;
             for (int j = 1; j < text.length; j++) {
                 if (text[j].equals("-t"))
                     parameters[cnt++] = sanitizeArgument(getArgument(text, j + 1));
-                if (text[j].equals("-d"))
+                else if (text[j].equals("-d"))
                     parameters[cnt++] = sanitizeArgument(getArgument(text, j + 1));
             }
             // System.out.println(Arrays.toString(parameters));
             CreateEvent obj = new CreateEvent(parameters);
             obj.execute();
+        }
+
+        else if (text[i].equals("ls")) {
+            parameters = new String[2];
+            for (int j = 1; j < text.length; j++) {
+                if (text[j].equals("-t"))
+                    parameters[cnt++] = sanitizeArgument(getArgument(text, j + 1));
+                else if (text[j].equals("-d"))
+                    parameters[cnt++] = sanitizeArgument(getArgument(text, j + 1));
+            }
+
+            ListEvent obj = new ListEvent(parameters);
+            obj.execute();
+
+        }
+
+        else if (text[i].equals("find")) {
+            parameters = new String[1];
+            parameters[0] = sanitizeArgument(getArgument(text, i + 1));
+            FindEvent obj = new FindEvent(parameters);
+            obj.execute();
+
         }
 
     }
@@ -101,7 +125,7 @@ public class Command extends DBAccess {
         }
         try {
             String argument = getArgument(text, i + 1);
-            if (argument.charAt(0) == '\'' && argument.charAt(argument.length() - 1) == '\'') {
+            if (Pattern.matches("'[-_!@#$%^&*()0-9a-zA-Z'\\s+]+'", argument)) {
                 argument = sanitizeArgument(argument);
 
                 if (text[i].equalsIgnoreCase("-d")) {
@@ -114,6 +138,7 @@ public class Command extends DBAccess {
 
                 return true;
             }
+
         } catch (StringIndexOutOfBoundsException e) {
             m.outputMessage(m.getErrorMessage(null, null), 'e');
             e.printStackTrace();
@@ -123,13 +148,7 @@ public class Command extends DBAccess {
     }
 
     public boolean verifyTimeInput(String argument) {
-        // Should work without this
-        if (argument.length() != 9) {
-            // m.outputMessage(m.getErrorMessage("lblInvalidTime", null), 'e');
-            return false;
-        }
-
-        try {
+        if (Pattern.matches("[0-9]{3,5}-[0-9]{3,5}", argument)) {
             int startTime = Integer.parseInt(argument.substring(0, argument.indexOf('-')));
             int endTime = Integer.parseInt(argument.substring(argument.indexOf('-') + 1, argument.length()));
 
@@ -138,43 +157,28 @@ public class Command extends DBAccess {
                 m.outputMessage(m.getErrorMessage("lblInvalidTime", null), 'e');
                 return false;
             }
-        } catch (NumberFormatException e) {
-            m.outputMessage(m.getErrorMessage("lblNonNumerical", null), 'e');
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
-    // ! Fix Verification of Date input -> Error message appears when no date is
-    // ! supplied -> no error message should appear
     public boolean verifyDateInput(String argument) {
-        int values[] = new int[3];
-        int cnt = 0;
-        int index = 0;
-        for (int j = 0; j < argument.length(); j++) {
-            try {
-                if (argument.charAt(j) == '-') {
-                    values[cnt++] = Integer.parseInt(argument.substring(index, j));
-                    index = j + 1;
-                }
-
-                if (j == argument.length() - 1) {
-                    values[cnt++] = Integer.parseInt(argument.substring(index, j + 1));
-                }
-
-            } catch (NumberFormatException e) {
-                m.outputMessage(m.getErrorMessage("lblNonNumerical", null), 'e');
+        int dates[][] = { { 1, 31 }, { 2, 28 }, { 3, 31 }, { 4, 30 }, { 5, 31 }, { 6, 30 }, { 7, 31 }, { 8, 31 },
+                { 9, 30 }, { 10, 31 }, { 11, 30 }, { 12, 31 } };
+        if (Pattern.matches("[0-9]{1,3}-[0-9]{1,3}-[0-9]{4}", argument)) {
+            int month = Integer.parseInt(argument.substring(0, argument.indexOf('-')));
+            int day = Integer.parseInt(argument.substring(argument.indexOf('-') + 1, argument.lastIndexOf('-')));
+            int year = Integer.parseInt(argument.substring(argument.lastIndexOf('-') + 1, argument.length()));
+            if (month > 12 || year < 2022) {
+                m.outputMessage(m.getErrorMessage("lblInvalidDate", null), 'e');
                 return false;
             }
+            if (dates[month - 1][1] >= day && day >= 1) {
+                return true;
+            }
         }
-
-        if (!((1 <= values[0] && values[0] <= 12) && (1 <= values[1] && values[1] <= 31)
-                && (2022 <= values[2] && values[2] <= 3022))) {
-            m.outputMessage(m.getErrorMessage("lblInvalidDate", null), 'e');
-            return false;
-        }
-
-        return true;
+        m.outputMessage(m.getErrorMessage("lblInvalidDate", null), 'e');
+        return false;
     }
 
     // 'i' should be the index in front of the command

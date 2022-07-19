@@ -1,13 +1,20 @@
 package MainApp;
 
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 import javax.lang.model.util.ElementScanner6;
+
+import MainApp1.Create;
 
 public class CreateEvent extends Command {
     static int id = 7;
     String parameters[] = new String[3]; // name, date/time
     Event e = new Event();
+
+    public CreateEvent() {
+
+    }
 
     public CreateEvent(String parameters[]) {
         this.parameters = parameters;
