@@ -73,7 +73,6 @@ public class Command extends DBAccess {
             parameters[0] = sanitizeArgument(getArgument(text, i + 1));
             FindEvent obj = new FindEvent(parameters);
             obj.execute();
-
         }
 
     }
@@ -119,6 +118,7 @@ public class Command extends DBAccess {
         return true;
     }
 
+    // Fix argument verification for command ls
     private boolean verifyArgument(String text[], int i) {
         if (text[i].equalsIgnoreCase("ls") && i == text.length - 1) {
             return true;
