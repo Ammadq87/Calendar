@@ -65,4 +65,24 @@ public class CreateEvent extends Command {
         e.setTimes(start, end);
     }
 
+    public boolean validateCommand(String command) {
+        if (Pattern.matches(
+                "[a-z]{2,4} '[-_!@#$%^&*()0-9a-zA-Z'\\s+]+' [--][d] '[0-9]{1,3}-[0-9]{1,3}-[0-9]{4}'{1} [-][t] '[0-9]{3,5}-[0-9]{3,5}'{1}",
+                command))
+            return true;
+        else if (Pattern.matches(
+                "[a-z]{2,4} '[-_!@#$%^&*()0-9a-zA-Z'\\s+]+' [-][t] '[0-9]{3,5}-[0-9]{3,5}'{1} [--][d] '[0-9]{1,3}-[0-9]{1,3}-[0-9]{4}'{1}",
+                command)) {
+            return true;
+        } else if (Pattern.matches("[a-z]{2,4} '[-_!@#$%^&*()0-9a-zA-Z'\\s+]+' [-][t] '[0-9]{3,5}-[0-9]{3,5}'{1}",
+                command)) {
+            return true;
+        } else if (Pattern.matches(
+                "[a-z]{2,4} '[-_!@#$%^&*()0-9a-zA-Z'\\s+]+' [--][d] '[0-9]{1,3}-[0-9]{1,3}-[0-9]{4}'{1}", command)) {
+            return true;
+        } else if (Pattern.matches("[a-z]{2,4} '[-_!@#$%^&*()0-9a-zA-Z'\\s+]+'", command)) {
+            return true;
+        }
+        return false;
+    }
 }
