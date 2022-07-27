@@ -1,29 +1,31 @@
 # To Do List
 
-- Effort Sizing: 5 point rating scheme used to determine how important an item is
-  - 1: is the lowest rating, 5: is the highest
-- Labels:
-  - [Bug] use for bugs where something does not work as expected or produces an incorrect result
-  - [Dev] implementing fixes to bugs or updating code
-  - use `**` to close items
-
 ## app.java
 
 ## Command.java
 
-- [Bug] When using a name with a single character, like 'I'm w Ammad', it will throw an error since it detects 'w' as an invalid command. Only occurs if the single character is not beside a single quote
+- #### Bug1 : Invalid Command with 1 character
+  - When using a name with a single character, like 'I'm w Ammad', it will throw an error since it detects 'w' as an invalid command. Only occurs if the single character is not beside a single quote
+- #### Dev1 : Implement verification for **ls** command
+  - Determine whether regex expressions should be used instead of current methods
+  - Regex Methods > slower, lesser complexity, less error prone
+  - Current Implementation > faster, error prone
 
 ## CreateEvent.java
 
-- [Dev] If event timing conflicts with other events, notfiy user what events are having conflicts
+- #### Dev1 : Conflict Notification
+  - If event timing conflicts with other events, notfiy user what events are having conflicts
   - Look into verifyTimeInput() where it checks the startTime and endTime
-  - Events that are labelled as <All-Day> should be displayed too
-- [Dev] Time inputs should only be 15-minute intervals
+  - Events that are labelled as **All-Day** should be displayed too
+- #### Dev2 : Time Inputs should only be 15-minute intervals :heavy_check_mark:
 
 ## DBAccess.java
 
 ## Event.java
 
 ## ListEvent.java
+
+- #### Dev1 : Conflicting Events output
+  - in relation with [CreateEvent.java > Dev1](#createeventjava)
 
 ## Other
