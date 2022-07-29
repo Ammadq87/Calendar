@@ -48,8 +48,8 @@ public class Messages {
 
         String labels[][] = {
                 { "lblCommandNotFound", "Command" + opt + "Not Found" },
-                { "lblInvalidDate", "Invalid Date" },
-                { "lblInvalidTime", "Invalid Time" },
+                { "lblInvalidDate", "Invalid Date > " + opt },
+                { "lblInvalidTime", "Invalid Time > " + opt },
                 { "lblInvalidParameter", "Invalid Parameter" },
                 { "lblInvalidArgument", "Invalid Arguemnt" },
                 { "lblNonNumerical", "Non-numerical Value Provided" },
@@ -74,8 +74,12 @@ public class Messages {
         String labels[][] = {
                 { "lblIntro", "Enter Command. Type -h for help" },
                 { "lblSuccess", "Success" },
-                { "lblSavedSuccessfully", "Value(s) Saved Successfully" }
+                { "lblSavedSuccessfully", "Value(s) Saved Successfully" },
+                { "lblExit", "Exited application" }
         };
+
+        if (lbl.equals("lblExit"))
+            return "\n> " + labels[labels.length - 1][1];
 
         for (int i = 0; i < labels.length; i++) {
             if (lbl.equals(labels[i][0])) {

@@ -1,41 +1,47 @@
 package MainApp;
 
-import java.util.Arrays;
+import java.util.*;
 import java.util.regex.Pattern;
 
-import javax.lang.model.util.ElementScanner6;
-
-import MainApp1.Create;
-
-public class CreateEvent extends Command {
-    static int id = 7;
-    String parameters[] = new String[3]; // name, date/time
+public class CreateEvent extends Command implements ICommand {
     Event e = new Event();
+    List<String[]> params = new ArrayList<String[]>();
+    String command = "";
 
-    public CreateEvent() {
-
+    public CreateEvent(String command) {
+        this.command = command;
     }
 
-    public CreateEvent(String parameters[]) {
-        this.parameters = parameters;
-    }
-
+    @Override
     public void execute() {
-        e.setName(this.parameters[0]);
 
-        for (int i = 1; i < this.parameters.length; i++) {
-            if (this.parameters[i] != null && verifyTimeInput(this.parameters[i])) {
-                setTimeParameter(this.parameters[i]);
-            }
+        // Set parameters
+        this.params = arguments();
 
-            else if (this.parameters[i] != null && verifyDateInput(this.parameters[i])) {
-                setDateParameter(this.parameters[i]);
+        // Then execute query
+        int errorCount = 0;
+        for (int i = 0; i < this.params.size(); i++) {
+            String param = this.params.get(i)[0];
+            String arg = this.params.get(i)[1];
+
+            if (param.equals("n")) {
+                this.e.setName(arg);
+            } else if (param.equals("t")) {
+                if (!setTimeParameter(arg, this.e)) {
+                    errorCount++;
+                }
+            } else if (param.equals("d")) {
+                if (!setDateParameter(arg, this.e)) {
+                    errorCount++;
+                }
             }
         }
 
-        super.executeQuery(createQuery("events"));
+        if (errorCount == 0)
+            super.executeQuery(createQuery("events"));
     }
 
+    @Override
     public String createQuery(String table) {
         String query = "INSERT INTO " + table + " VALUES (";
         String value = (this.e.startTime == 0 && this.e.endTime == 2359)
@@ -50,39 +56,54 @@ public class CreateEvent extends Command {
         return query;
     }
 
-    public void setDateParameter(String date) {
-        String temp[] = date.split("-");
-        int dates[] = new int[3];
-        for (int i = 0; i < temp.length; i++) {
-            dates[i] = Integer.parseInt(temp[i]);
+    @Override
+    public boolean validateCommand() {
+        if (this.command == null || this.command.length() == 0) {
+            return false;
         }
-        e.setDates(dates);
-    }
-
-    public void setTimeParameter(String time) {
-        int start = Integer.parseInt(time.substring(0, time.indexOf('-')));
-        int end = Integer.parseInt(time.substring(time.indexOf('-') + 1, time.length()));
-        e.setTimes(start, end);
-    }
-
-    public boolean validateCommand(String command) {
         if (Pattern.matches(
-                "[a-z]{2,4} '[-_!@#$%^&*()0-9a-zA-Z'\\s+]+' [--][d] '[0-9]{1,3}-[0-9]{1,3}-[0-9]{4}'{1} [-][t] '[0-9]{3,5}-[0-9]{3,5}'{1}",
-                command))
+                "event [a-z]{2,4} '[-_!@#$%^&*()0-9a-zA-Z'\\s+]+' [--][d] '[0-9]{1,3}-[0-9]{1,3}-[0-9]{4}'{1} [-][t] '[0-9]{3,5}-[0-9]{3,5}'{1}",
+                this.command))
             return true;
         else if (Pattern.matches(
-                "[a-z]{2,4} '[-_!@#$%^&*()0-9a-zA-Z'\\s+]+' [-][t] '[0-9]{3,5}-[0-9]{3,5}'{1} [--][d] '[0-9]{1,3}-[0-9]{1,3}-[0-9]{4}'{1}",
-                command)) {
+                "event [a-z]{2,4} '[-_!@#$%^&*()0-9a-zA-Z'\\s+]+' [-][t] '[0-9]{3,5}-[0-9]{3,5}'{1} [--][d] '[0-9]{1,3}-[0-9]{1,3}-[0-9]{4}'{1}",
+                this.command)) {
             return true;
-        } else if (Pattern.matches("[a-z]{2,4} '[-_!@#$%^&*()0-9a-zA-Z'\\s+]+' [-][t] '[0-9]{3,5}-[0-9]{3,5}'{1}",
-                command)) {
+        } else if (Pattern.matches("event [a-z]{2,4} '[-_!@#$%^&*()0-9a-zA-Z'\\s+]+' [-][t] '[0-9]{3,5}-[0-9]{3,5}'{1}",
+                this.command)) {
             return true;
         } else if (Pattern.matches(
-                "[a-z]{2,4} '[-_!@#$%^&*()0-9a-zA-Z'\\s+]+' [--][d] '[0-9]{1,3}-[0-9]{1,3}-[0-9]{4}'{1}", command)) {
+                "event [a-z]{2,4} '[-_!@#$%^&*()0-9a-zA-Z'\\s+]+' [--][d] '[0-9]{1,3}-[0-9]{1,3}-[0-9]{4}'{1}",
+                this.command)) {
             return true;
-        } else if (Pattern.matches("[a-z]{2,4} '[-_!@#$%^&*()0-9a-zA-Z'\\s+]+'", command)) {
+        } else if (Pattern.matches("event [a-z]{2,4} '[[.]-_!@#$%^&*()0-9a-zA-Z'\\s+]+'", this.command)) {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<String[]> arguments() {
+        if (this.command == null || this.command.length() == 0) {
+            return null;
+        }
+
+        String text[] = command.split(" ");
+        List<String[]> params = new ArrayList<String[]>();
+
+        String name[] = { "n", sanitizeArgument(getArgument(text, 2)) };
+        params.add(name);
+
+        for (int i = 1; i < text.length; i++) {
+            if (text[i].equals("-t")) {
+                String time[] = { "t", sanitizeArgument(getArgument(text, i + 1)) };
+                params.add(time);
+            } else if (text[i].equals("-d")) {
+                String date[] = { "d", sanitizeArgument(getArgument(text, i + 1)) };
+                params.add(date);
+            }
+        }
+
+        return params;
     }
 }

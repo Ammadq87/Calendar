@@ -7,6 +7,20 @@ public class Command extends DBAccess {
     String flags[] = { "-d", "-t" };
     String listOfCommands[] = { "ce", "ls", "rm" };
 
+    /*
+     * Input
+     * -> Command
+     * > check if command exists
+     * True: create Command object based on command
+     * Command Object:
+     * > verify command based on Command object's validation method
+     * Verification True: Gather and set arugments based on command
+     * > Execute command
+     * Verification False: Return message
+     * False: Return message
+     * 
+     */
+
     public Command() {
 
     }
@@ -26,125 +40,68 @@ public class Command extends DBAccess {
         c.replaceAll("\\s{2,}", " ");
     }
 
-    // Assuming input is like: <'argument'>
-    public String sanitizeArgument(String arg) {
-        return arg.substring(1, arg.length() - 1);
-    }
-
-    public void executeCommand() {
-        String text[] = this.command.split(" ");
-        createCommand(text, 1);
-    }
-
-    private void createCommand(String text[], int i) {
-        String parameters[];
-        int cnt = 0;
-        if (text[i].equals("ce")) {
-            parameters = new String[3];
-            parameters[0] = sanitizeArgument(getArgument(text, i + 1));
-            cnt = 1;
-            for (int j = 1; j < text.length; j++) {
-                if (text[j].equals("-t"))
-                    parameters[cnt++] = sanitizeArgument(getArgument(text, j + 1));
-                else if (text[j].equals("-d"))
-                    parameters[cnt++] = sanitizeArgument(getArgument(text, j + 1));
-            }
-            // System.out.println(Arrays.toString(parameters));
-            CreateEvent obj = new CreateEvent(parameters);
-            obj.execute();
-        }
-
-        else if (text[i].equals("ls")) {
-            parameters = new String[2];
-            for (int j = 1; j < text.length; j++) {
-                if (text[j].equals("-t"))
-                    parameters[cnt++] = sanitizeArgument(getArgument(text, j + 1));
-                else if (text[j].equals("-d"))
-                    parameters[cnt++] = sanitizeArgument(getArgument(text, j + 1));
-            }
-
-            ListEvent obj = new ListEvent(parameters);
-            obj.execute();
-
-        }
-
-        else if (text[i].equals("find")) {
-            parameters = new String[1];
-            parameters[0] = sanitizeArgument(getArgument(text, i + 1));
-            FindEvent obj = new FindEvent(parameters);
-            obj.execute();
-        }
-
+    public String getCommand() {
+        return this.command;
     }
 
     public boolean isCommandValid() {
+        boolean found = false;
         String text[] = this.command.split(" ");
-        if (!text[0].equalsIgnoreCase("event")) {
+        if (text.length <= 1) {
+            m.outputMessage(m.getErrorMessage("lblCommandNotFound", null), 'e');
             return false;
         }
 
-        for (int i = 1; i < text.length; i++) {
-            if (text[i].length() <= 1) {
-                m.outputMessage(m.getErrorMessage("lblCommandNotFound", text[i]), 'e');
-                return false;
-            }
-
-            if (isFlag(text[i]) || isCommand(text[i])) {
-                if (!check(text, i)) {
-                    return false;
-                }
+        for (String c : listOfCommands) {
+            if (c.equals(text[1])) {
+                found = true;
+                break;
             }
         }
 
-        return true;
-    }
-
-    public boolean check(String text[], int i) {
-        if (!text[i].equalsIgnoreCase("ls") && i == text.length - 1) {
-            m.outputMessage(m.getErrorMessage("lblCommandNotFound", text[i]), 'e');
+        if (!found) {
+            m.outputMessage(m.getErrorMessage("lblCommandNotFound", null), 'e');
             return false;
         }
 
-        if (isDuplicateOrUnknownValue(text, i)) {
-            m.outputMessage(m.getErrorMessage("lblDuplicateOrUnknownValue", text[i]), 'e');
-            return false;
+        switch (text[1]) {
+            case "ce":
+                return CreateEventObject();
+            case "ls":
+                return ListEventObject();
         }
 
-        if ((isCommand(text[i]) || isFlag(text[i])) && !verifyArgument(text, i)) {
-            m.outputMessage(m.getErrorMessage("lblInvalidArgument", null), 'e');
-            return false;
-        }
-
-        return true;
-    }
-
-    // Fix argument verification for command ls
-    private boolean verifyArgument(String text[], int i) {
-        if (text[i].equalsIgnoreCase("ls") && i == text.length - 1) {
-            return true;
-        }
-        try {
-            String argument = getArgument(text, i + 1);
-            if (Pattern.matches("'[-_!@#$%^&*()0-9a-zA-Z'\\s+]+'", argument)) {
-                argument = sanitizeArgument(argument);
-
-                if (text[i].equalsIgnoreCase("-d")) {
-                    return verifyDateInput(argument);
-                }
-
-                else if (text[i].equalsIgnoreCase("-t")) {
-                    return verifyTimeInput(argument);
-                }
-
-                return true;
-            }
-
-        } catch (StringIndexOutOfBoundsException e) {
-            m.outputMessage(m.getErrorMessage(null, null), 'e');
-            e.printStackTrace();
-            return false;
-        }
+        // If for some reason text[1] is found but doesn't go through switch, then
+        // return CommandNotFound
+        m.outputMessage(m.getErrorMessage("lblCommandNotFound", null), 'e');
         return false;
+    }
+
+    private boolean ListEventObject() {
+        ListEvent obj = new ListEvent(this.command);
+        boolean executable = obj.validateCommand();
+        if (executable) {
+            obj.execute();
+        } else {
+            m.outputMessage(m.getErrorMessage("lblCommandFailed", this.command), 'e');
+        }
+        return executable;
+    }
+
+    private boolean CreateEventObject() {
+        CreateEvent obj = new CreateEvent(this.command);
+        boolean executable = obj.validateCommand();
+        if (executable) {
+            obj.execute();
+        } else {
+            m.outputMessage(m.getErrorMessage("lblCommandFailed", this.command), 'e');
+        }
+        return executable;
+    }
+
+    // Assuming input is like: <'argument'>
+    public String sanitizeArgument(String arg) {
+        return arg.substring(1, arg.length() - 1);
     }
 
     public boolean verifyTimeInput(String argument) {
@@ -154,11 +111,19 @@ public class Command extends DBAccess {
 
             if (!((startTime <= endTime) && (0 <= startTime && startTime <= 2359)
                     && (0 <= endTime && endTime <= 2359))) {
-                m.outputMessage(m.getErrorMessage("lblInvalidTime", null), 'e');
+                m.outputMessage(
+                        m.getErrorMessage("lblInvalidTime",
+                                "Start time cannot be greater than End time OR times should be between [0 and 2400)"),
+                        'e');
+                return false;
+            } else if (!((startTime % 100) % 15 == 0 && (endTime % 100) % 15 == 0)) {
+                m.outputMessage(m.getErrorMessage("lblInvalidTime", "Time must be in 15-minute intervals"),
+                        'e');
                 return false;
             }
             return true;
         }
+        m.outputMessage(m.getErrorMessage("lblInvalidTime", null), 'e');
         return false;
     }
 
@@ -169,8 +134,8 @@ public class Command extends DBAccess {
             int month = Integer.parseInt(argument.substring(0, argument.indexOf('-')));
             int day = Integer.parseInt(argument.substring(argument.indexOf('-') + 1, argument.lastIndexOf('-')));
             int year = Integer.parseInt(argument.substring(argument.lastIndexOf('-') + 1, argument.length()));
-            if (month > 12 || year < 2022) {
-                m.outputMessage(m.getErrorMessage("lblInvalidDate", null), 'e');
+            if ((month > 12 || month <= 0) || year < 2022) {
+                m.outputMessage(m.getErrorMessage("lblInvalidDate", "Month or Year are out of scope"), 'e');
                 return false;
             }
             if (dates[month - 1][1] >= day && day >= 1) {
@@ -179,6 +144,29 @@ public class Command extends DBAccess {
         }
         m.outputMessage(m.getErrorMessage("lblInvalidDate", null), 'e');
         return false;
+    }
+
+    public boolean setDateParameter(String date, Event e) {
+        boolean verified = verifyDateInput(date);
+        if (verified) {
+            String temp[] = date.split("-");
+            int dates[] = new int[3];
+            for (int i = 0; i < temp.length; i++) {
+                dates[i] = Integer.parseInt(temp[i]);
+            }
+            e.setDates(dates);
+        }
+        return verified;
+    }
+
+    public boolean setTimeParameter(String time, Event e) {
+        boolean verified = verifyTimeInput(time);
+        if (verified) {
+            int start = Integer.parseInt(time.substring(0, time.indexOf('-')));
+            int end = Integer.parseInt(time.substring(time.indexOf('-') + 1, time.length()));
+            e.setTimes(start, end);
+        }
+        return verified;
     }
 
     // 'i' should be the index in front of the command
@@ -196,28 +184,7 @@ public class Command extends DBAccess {
         return joined;
     }
 
-    private boolean isDuplicateOrUnknownValue(String text[], int i) {
-        int cnt = 0;
-        if (isCommand(text[i])) {
-            for (int j = i + 1; j < text.length; j++) {
-                if (isCommand(text[j]))
-                    return true;
-            }
-            return !(i == 1);
-        } else {
-            for (int j = 1; j < text.length; j++) {
-                if (j != i && text[j].equalsIgnoreCase(text[i]))
-                    return true;
-
-                if (isCommand(text[j]) && j != i)
-                    cnt++;
-            }
-            // If the count is greater than 1, there is more than 1 command
-            return cnt > 1;
-        }
-    }
-
-    public boolean isFlag(String f) {
+    private boolean isFlag(String f) {
         // String flag = sanitizeArgument(f);
         if (f.charAt(0) == '-') {
             for (int i = 0; i < this.flags.length; i++) {
@@ -229,7 +196,7 @@ public class Command extends DBAccess {
         return false;
     }
 
-    public boolean isCommand(String c) {
+    private boolean isCommand(String c) {
         for (int i = 0; i < this.listOfCommands.length; i++) {
             if (this.listOfCommands[i].equals(c))
                 return true;

@@ -1,59 +1,35 @@
 package MainApp;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Pattern;
 
-public class ListEvent extends Command {
+public class ListEvent extends Command implements ICommand {
 
+    String command = "";
     String parameters[]; // (1 or 2) date(s), (1 or 2) time(s)
-
-    /*
-     * 
-     * [Date: 07-07-2022]
-     * 
-     * [10:00] [Umer Bday]
-     * | |
-     * | |
-     * | ______ V ________
-     * [11:00]
-     * |
-     * | [Eid Prayer]
-     * | |
-     * [12:00] |
-     * | |
-     * | _______ V ________
-     * | [Lunch Date]
-     * [13:00] _______ V ________
-     * | |
-     * | |
-     * | |
-     * [14:00]
-     * 
-     * 
-     * [15:00]
-     * 
-     * 
-     * 
-     */
-
+    List<String[]> params = new ArrayList<String[]>();
     Event e = new Event();
     String schedule[][] = new String[96][2];
 
-    public ListEvent(String parameters[]) {
-        this.parameters = parameters;
-        initializeScheduleFormat();
+    public ListEvent(String command) {
+        this.command = command;
     }
 
+    @Override
     public void execute() {
-        List<String[]> l = super.getResultsFromQuery(getQuery(parameters, "events", null), "name-s", "startTime-i",
+        List<String[]> l = super.getResultsFromQuery(createQuery("events"), "name-s", "startTime-i",
                 "endTime-i", "eventDate-s");
+
+        if (this.command.contains("-t")) {
+            initializeScheduleFormat(convertTimeToIndex(this.e.startTime), convertTimeToIndex(this.e.endTime));
+        } else {
+            initializeScheduleFormat(0, this.schedule.length);
+        }
 
         for (String s[] : l) {
 
-            int start = (Integer.parseInt(s[1]) % 100) / 15 + (Integer.parseInt(s[1]) / 100) * 4;
-            int end = (Integer.parseInt(s[2]) % 100) / 15 + (Integer.parseInt(s[2]) / 100) * 4;
+            int start = convertTimeToIndex(s[1]);
+            int end = convertTimeToIndex(s[2]);
 
             for (int i = start; i <= end; i++) {
                 if (i == start) {
@@ -71,7 +47,18 @@ public class ListEvent extends Command {
         printSchedule();
     }
 
-    private void initializeScheduleFormat() {
+    private int convertTimeToIndex(Object obj) {
+        if (obj == null)
+            return 0;
+        if (obj instanceof String) {
+            return ((Integer.parseInt((String) obj)) % 100) / 15 + ((Integer.parseInt((String) obj)) / 100) * 4;
+        } else if (obj instanceof Integer) {
+            return (((Integer) obj) % 100) / 15 + ((((Integer) obj)) / 100) * 4;
+        }
+        return 0;
+    }
+
+    private void initializeScheduleFormat(int start, int end) {
         int hour = -1;
         for (int i = 0; i < this.schedule.length; i++) {
             if ((i * 15) % 60 == 0) {
@@ -81,7 +68,14 @@ public class ListEvent extends Command {
 
                 this.schedule[i][0] = "[" + (hour < 10 ? "0" + hour : "" + hour) + ":" + (i * 15) % 60 + "]";
             }
+
+            if (!(start <= i && i <= end)) {
+                this.schedule[i][1] = " ";
+            } else {
+                this.schedule[i][0] += " > ";
+            }
         }
+
     }
 
     public void printSchedule() {
@@ -100,45 +94,103 @@ public class ListEvent extends Command {
         return output;
     }
 
-    /*
-     * Case #1: p[].length is 1 (date)
-     * Case #2: p[].length is 1 (time interval)
-     * Case #3: p[].length is 2 (date interval)
-     * Case #4: p[].length is 2-3 (time and date interval)
-     */
-
-    public String getQuery(String parameters[], String table, String columns) {
+    // Fix query statements
+    @Override
+    public String createQuery(String table) {
+        this.params = arguments();
         String query = "SELECT * FROM " + table;
 
-        // If no parameters provided, output current day's events
-        if (parameters[0] == null && parameters[1] == null) {
-            query += " WHERE month = " + this.e._date[0] + " AND day = " + this.e._date[1] + " AND year = "
+        if (this.params == null || this.params.size() == 0) {
+            return query + " WHERE month = " + this.e._date[0] + " AND day = " + this.e._date[1]
+                    + " AND year = "
                     + this.e._date[2];
         }
 
-        // Add Cases for date and time
+        // 0 date, 1 AND, 2 time
+        query += " WHERE {0} {1} {2};";
 
-        return query + ";";
-    }
+        int errorCount = 0;
 
-    private String appendDate(String date) {
-        // String d = date.split("-");
-        // return "month < "+d[]
+        for (int i = 0; i < this.params.size(); i++) {
+            String param = this.params.get(i)[0];
+            String arg = this.params.get(i)[1];
+            if (param.equals("t")) {
+                if (!setTimeParameter(arg, this.e)) {
+                    errorCount++;
+                } else {
+                    query = query.replace("{2}",
+                            "startTime >= " + this.e.startTime + " AND endTime <= " + this.e.endTime);
+                }
+            } else if (param.equals("d")) {
+                if (!setDateParameter(arg, this.e)) {
+                    errorCount++;
+                } else {
+                    query = query.replace("{0}",
+                            "month = " + this.e._date[0] + " AND day = " + this.e._date[1]
+                                    + " AND year = "
+                                    + this.e._date[2]);
+                }
+            }
+        }
+
+        if (errorCount == 0) {
+
+            if (query.contains("{0}")) {
+                query = query.replace("{0}", "month = " + this.e._date[0] + " AND day = " + this.e._date[1]
+                        + " AND year = "
+                        + this.e._date[2]);
+            }
+
+            if (query.contains("{2}")) {
+                query = query.replace("{2}", "");
+            }
+
+            if (query.contains("{1}")) {
+                query = query.replace("{1}", "AND");
+            }
+
+            return query;
+        }
+
         return null;
     }
 
-    private boolean isTime(String time) {
-        if (time == null)
+    // TODO: include feature where a time and/or date interval can be included
+    @Override
+    public boolean validateCommand() {
+        if (this.command == null || this.command.length() == 0)
             return false;
-        String t[] = time.split("-");
-        return t.length == 1;
+        if (Pattern.matches("event ls [--][d] '[0-9]{1,3}-[0-9]{1,3}-[0-9]{4}'{1} [-][t] '[0-9]{3,5}-[0-9]{3,5}'{1}",
+                this.command))
+            return true;
+        else if (Pattern.matches(
+                "event ls [-][t] '[0-9]{3,5}-[0-9]{3,5}'{1} [--][d] '[0-9]{1,3}-[0-9]{1,3}-[0-9]{4}'{1}", this.command))
+            return true;
+        else if (Pattern.matches("event ls [--][d] '[0-9]{1,3}-[0-9]{1,3}-[0-9]{4}'{1}", this.command))
+            return true;
+        else if (Pattern.matches("event ls [-][t] '[0-9]{3,5}-[0-9]{3,5}'{1}", this.command))
+            return true;
+        else if (Pattern.matches("event ls", this.command))
+            return true;
+        return false;
     }
 
-    private boolean isDate(String date) {
-        if (date == null)
-            return false;
-        String d[] = date.split("-");
-        return (d.length == 3 || d.length == 5);
+    @Override
+    public List<String[]> arguments() {
+        String text[] = this.command.split(" ");
+        List<String[]> params = new ArrayList<String[]>();
+
+        for (int i = 1; i < text.length; i++) {
+            if (text[i].equals("-t")) {
+                String time[] = { "t", sanitizeArgument(getArgument(text, i + 1)) };
+                params.add(time);
+            } else if (text[i].equals("-d")) {
+                String date[] = { "d", sanitizeArgument(getArgument(text, i + 1)) };
+                params.add(date);
+            }
+        }
+
+        return params;
     }
 
 }

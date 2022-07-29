@@ -11,6 +11,7 @@ public class app {
     }
 
     public app() {
+
         Scanner input = new Scanner(System.in);
         messageDisplay.outputMessage(messageDisplay.getMessage("lblIntro"), 'r');
         System.out.print("> ");
@@ -20,10 +21,9 @@ public class app {
 
         while (!cmd.equals("-q")) {
             if (!c.isCommandValid()) {
-            } else {
-                c.executeCommand();
+                messageDisplay.outputMessage("Failed to Execute Command", 't');
             }
-            messageDisplay.outputMessage("Failed to Execute Command", 't');
+
             System.out.print("> ");
             cmd = input.nextLine();
             c.setCommand(cmd);
