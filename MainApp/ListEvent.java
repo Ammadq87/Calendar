@@ -17,7 +17,16 @@ public class ListEvent extends Command implements ICommand {
 
     @Override
     public void execute() {
-        List<String[]> l = super.getResultsFromQuery(createQuery("events"), "name-s", "startTime-i",
+
+        String query = createQuery("events");
+
+        if (query == null) {
+            m.outputMessage(m.getErrorMessage("lblQueryFailed", "null"), 'e');
+            m.outputMessage(m.getErrorMessage("lblInvalidArgument", null), 'e');
+            return;
+        }
+
+        List<String[]> l = super.getResultsFromQuery(query, "name-s", "startTime-i",
                 "endTime-i", "eventDate-s");
 
         if (this.command.contains("-t")) {
@@ -72,7 +81,7 @@ public class ListEvent extends Command implements ICommand {
             if (!(start <= i && i <= end)) {
                 this.schedule[i][1] = " ";
             } else {
-                this.schedule[i][0] += " > ";
+                // this.schedule[i][0] += " > ";
             }
         }
 
@@ -134,25 +143,28 @@ public class ListEvent extends Command implements ICommand {
         }
 
         if (errorCount == 0) {
-
-            if (query.contains("{0}")) {
+            // Only Time Option
+            if (query.contains("{0}") && !query.contains("{2}")) {
                 query = query.replace("{0}", "month = " + this.e._date[0] + " AND day = " + this.e._date[1]
                         + " AND year = "
                         + this.e._date[2]);
-            }
-
-            if (query.contains("{2}")) {
-                query = query.replace("{2}", "");
-            }
-
-            if (query.contains("{1}")) {
                 query = query.replace("{1}", "AND");
             }
 
-            return query;
+            // Only Date Option
+            else if (!query.contains("{0}") && query.contains("{2}")) {
+                query = query.replace("{2}", "");
+                query = query.replace("{1}", "");
+            }
+
+            else if (!query.contains("{0}") && !query.contains("{2}")) {
+                query = query.replace("{1}", "AND");
+            }
+        } else {
+            query = null;
         }
 
-        return null;
+        return query;
     }
 
     // TODO: include feature where a time and/or date interval can be included
