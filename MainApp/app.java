@@ -11,7 +11,6 @@ public class app {
     }
 
     public app() {
-
         Scanner input = new Scanner(System.in);
         messageDisplay.outputMessage(messageDisplay.getMessage("lblIntro"), 'r');
         System.out.print("> ");
