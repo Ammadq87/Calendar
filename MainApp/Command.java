@@ -109,11 +109,11 @@ public class Command extends DBAccess {
             int startTime = Integer.parseInt(argument.substring(0, argument.indexOf('-')));
             int endTime = Integer.parseInt(argument.substring(argument.indexOf('-') + 1, argument.length()));
 
-            if (!((startTime <= endTime) && (0 <= startTime && startTime <= 2359)
-                    && (0 <= endTime && endTime <= 2359))) {
+            if (!((startTime <= endTime) && (0 <= startTime && startTime <= 2400)
+                    && (0 <= endTime && endTime <= 2400))) {
                 m.outputMessage(
                         m.getErrorMessage("lblInvalidTime",
-                                "Start time cannot be greater than End time OR times should be between [0 and 2400)"),
+                                "Start time cannot be greater than End time OR times should be between [0 and 2400]"),
                         'e');
                 return false;
             } else if (!((startTime % 100) % 15 == 0 && (endTime % 100) % 15 == 0)) {
