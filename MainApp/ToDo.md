@@ -32,7 +32,7 @@
 ## ListEvent.java
 
 - ### NOTE :
-- ListEvent.java should be the last feature to be worked on as more features will affect this. Currently, a basic query for getting events based on time and date will do the job. Update and Delete functions should be implemented from now on, then Read function can continue development
+  - ListEvent.java should be the last feature to be worked on as more features will affect this. Currently, a basic query for getting events based on time and date will do the job. Update and Delete functions should be implemented from now on, then Read function can continue development
 - #### Dev1 : Conflicting Events output
   - in relation with [CreateEvent.java > Dev1](#dev1--conflict-notification)
 - #### Dev2 : Time Flag Implementation
