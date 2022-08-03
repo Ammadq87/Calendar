@@ -46,3 +46,32 @@
 
 - #### Bug1 :Pairing Optional and Exisitng error messages
   - in relation with [Command.java > Bug2](#bug2--invalid-time-and-date-error-messages)
+
+## New Features
+
+- Request Booking
+
+  - Users can request a booking to another user (ex: Doctor Appt)
+  - example cases:
+    - event req 'Doc Appt' -t '1200-1515' -d '7-7-2022' -email 'doctor@office.com'
+    - event req 'Doc Appt' -d '7-7-2022' -email 'doctor@office.com'
+      - This would be an <All-Day> event
+    - event req 'Doc Appt' -t '1200-1515' -email 'doctor@office.com'
+      - The date would be the date it was sent
+    - Subject and Optional Message should be implemented too
+  - <-email> tag can only be used if it exists as a contact
+
+- Create Contact
+
+  - Users can create a contact to book meetings to
+  - example cases:
+    - event contact 'Doctor'
+    - event contact 'Doctor' -name 'Ammad' -email 'ammad@mail.com'
+    - name and email tag are optional, but if user is requesting a booking, email tag should be included
+
+- Login
+  - There should be user accounts, login acess, etc
+  - example cases:
+    - event login -user 'ammad' -pass '123'
+    - no commands cannot be executed if user is not logged in
+    - NOTE: figure how to make the password blurred
