@@ -4,8 +4,8 @@ import java.util.regex.Pattern;
 
 public class Command extends DBAccess {
     String command;
-    String flags[] = { "-d", "-t" };
-    String listOfCommands[] = { "ce", "ls", "rm" };
+    String flags[] = { "-d", "-t", "-delete", "-edit" };
+    String listOfCommands[] = { "ce", "ls", "rm", "find" };
 
     /*
      * Input
@@ -69,12 +69,25 @@ public class Command extends DBAccess {
                 return CreateEventObject();
             case "ls":
                 return ListEventObject();
+            case "find":
+                return FindEventObject();
         }
 
         // If for some reason text[1] is found but doesn't go through switch, then
         // return CommandNotFound
         m.outputMessage(m.getErrorMessage("lblCommandNotFound", null), 'e');
         return false;
+    }
+
+    private boolean FindEventObject() {
+        FindEvent obj = new FindEvent(this.command);
+        boolean executable = obj.validateCommand();
+        if (executable) {
+            obj.execute();
+        } else {
+            m.outputMessage(m.getErrorMessage("lblCommandFailed", this.command), 'e');
+        }
+        return executable;
     }
 
     private boolean ListEventObject() {
