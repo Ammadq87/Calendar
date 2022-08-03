@@ -29,6 +29,10 @@
 
 ## Event.java
 
+## FindEvent.java
+
+- #### Feature: Display Editing Options for Found Queries
+
 ## ListEvent.java
 
 - ### NOTE :
