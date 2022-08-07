@@ -57,7 +57,8 @@ public class Messages {
                 { "lblQueryFailed", "Failed to Execute Query:" + opt },
                 { "lblCommandFailed", "Failed to Execute Command:" + opt },
                 { "lblPrintResultsFailed", "Failed to Print Results:" + opt },
-                { "lblDuplicateOrUnknownValue", "Duplucate or Unknown Value/Parameter Entered" }
+                { "lblDuplicateOrUnknownValue", "Duplucate or Unknown Value/Parameter Entered" },
+                { "lblCustom", opt }
 
         };
 
@@ -75,6 +76,11 @@ public class Messages {
                 { "lblIntro", "Enter Command. Type -h for help" },
                 { "lblSuccess", "Success" },
                 { "lblSavedSuccessfully", "Value(s) Saved Successfully" },
+                { "lblCreate", "Event Created" },
+                { "lblRead", "Event Found" },
+                { "lblUpdate", "Event Updated" },
+                { "lblDelete", "Event Deleted" },
+                { "lblOptionList", "Select an option" },
                 { "lblExit", "Exited application" }
         };
 
