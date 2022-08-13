@@ -187,7 +187,12 @@ public class ListEvent extends Command implements ICommand {
         return false;
     }
 
+    // Implement later
     @Override
+    public Map<String, String> getArguments() {
+        return null;
+    }
+
     public List<String[]> arguments() {
         String text[] = this.command.split(" ");
         List<String[]> params = new ArrayList<String[]>();

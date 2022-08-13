@@ -4,9 +4,9 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 public class CreateEvent extends Command implements ICommand {
-    Event e = new Event();
-    List<String[]> params = new ArrayList<String[]>();
-    String command = "";
+    private List<String[]> params = new ArrayList<String[]>();
+    private String command = "";
+    private Map<String, String> arguments;
 
     public CreateEvent(String command) {
         this.command = command;
@@ -15,42 +15,45 @@ public class CreateEvent extends Command implements ICommand {
     @Override
     public void execute() {
 
-        // Set parameters
-        this.params = arguments();
+        this.arguments = getArguments();
 
-        // Then execute query
+        if (this.arguments == null || this.arguments.size() == 0) {
+            m.outputMessage(m.getErrorMessage("lblQueryFailed", this.command), 'e');
+            return;
+        }
+
         int errorCount = 0;
-        for (int i = 0; i < this.params.size(); i++) {
-            String param = this.params.get(i)[0];
-            String arg = this.params.get(i)[1];
 
-            if (param.equals("n")) {
-                this.e.setName(arg);
-            } else if (param.equals("t")) {
-                if (!setTimeParameter(arg, this.e)) {
-                    errorCount++;
-                }
-            } else if (param.equals("d")) {
-                if (!setDateParameter(arg, this.e)) {
-                    errorCount++;
-                }
-            }
+        if (this.arguments.containsKey("n"))
+            super.e.setName(this.arguments.get("n"));
+        if (this.arguments.containsKey("t")) {
+            if (!setTimeParameter(this.arguments.get("t"), super.e))
+                errorCount++;
+        }
+        if (this.arguments.containsKey("d")) {
+            if (!setDateParameter(this.arguments.get("d"), super.e))
+                errorCount++;
         }
 
         if (errorCount == 0)
-            super.executeQuery(createQuery("events"));
+            super.executeQuery(createQuery("events"), 1000);
+        else {
+            m.outputMessage(m.getErrorMessage("lblQueryFailed", this.command), 'e');
+            return;
+        }
     }
 
     @Override
     public String createQuery(String table) {
         String query = "INSERT INTO " + table + " VALUES (";
-        String value = (this.e.startTime == 0 && this.e.endTime == 2359)
-                ? "{0}, \"" + this.e.name + " <All-Day>\", {1}, {2});"
-                : "{0}, \"" + this.e.name + "\", {1}, {2});";
+        String value = (super.e.startTime == 0 && super.e.endTime == 2359)
+                ? "{0}, \"" + super.e.name + " <All-Day>\", {1}, {2});"
+                : "{0}, \"" + super.e.name + "\", {1}, {2});";
 
         value = value.replace("{2}",
-                "\"" + e.getDate() + "\", " + e._date[0] + ", " + e._date[1] + ", " + e._date[2]);
-        value = value.replace("{1}", e.startTime + ", " + e.endTime);
+                "\"" + super.e.getDate() + "\", " + super.e._date[0] + ", " + super.e._date[1] + ", "
+                        + super.e._date[2]);
+        value = value.replace("{1}", super.e.startTime + ", " + super.e.endTime);
 
         query += value;
         return query;
@@ -82,28 +85,25 @@ public class CreateEvent extends Command implements ICommand {
         return false;
     }
 
-    @Override
-    public List<String[]> arguments() {
+    public Map<String, String> getArguments() {
+
+        Map<String, String> args = new HashMap<String, String>();
+
         if (this.command == null || this.command.length() == 0) {
             return null;
         }
 
-        String text[] = command.split(" ");
-        List<String[]> params = new ArrayList<String[]>();
-
-        String name[] = { "n", sanitizeArgument(getArgument(text, 2)) };
-        params.add(name);
-
-        for (int i = 1; i < text.length; i++) {
+        String text[] = this.command.split(" ");
+        args.put("n", sanitizeArgument(getArgument(text, 2)));
+        for (int i = 0; i < text.length; i++) {
             if (text[i].equals("-t")) {
-                String time[] = { "t", sanitizeArgument(getArgument(text, i + 1)) };
-                params.add(time);
+                args.put("t", sanitizeArgument(getArgument(text, i + 1)));
             } else if (text[i].equals("-d")) {
-                String date[] = { "d", sanitizeArgument(getArgument(text, i + 1)) };
-                params.add(date);
+                args.put("d", sanitizeArgument(getArgument(text, i + 1)));
             }
         }
 
-        return params;
+        return args;
+
     }
 }

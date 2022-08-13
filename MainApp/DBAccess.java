@@ -32,7 +32,7 @@ public class DBAccess {
         }
     }
 
-    public void executeQuery(String query) {
+    public void executeQuery(String query, int CRUD) {
         if (query.contains("{0}")) {
             query = query.replace("{0}", "" + this.currentID);
         }
@@ -40,7 +40,20 @@ public class DBAccess {
         try {
             Statement s = con.createStatement();
             s.executeUpdate(query);
-            m.outputMessage(m.getMessage("lblSavedSuccessfully"), 's');
+            switch (CRUD) {
+                case 1000:
+                    m.outputMessage(m.getMessage("lblCreate"), 's');
+                    break;
+                case 0100:
+                    m.outputMessage(m.getMessage("lblRead"), 's');
+                    break;
+                case 0010:
+                    m.outputMessage(m.getMessage("lblUpdate"), 's');
+                    break;
+                case 0001:
+                    m.outputMessage(m.getMessage("lblDelete"), 's');
+                    break;
+            }
         } catch (SQLException ex) {
             m.outputMessage(m.getErrorMessage("lblQueryFailed", query), 'e');
             ex.printStackTrace();

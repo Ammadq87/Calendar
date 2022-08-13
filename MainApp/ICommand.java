@@ -13,6 +13,6 @@ public interface ICommand {
 
     public boolean validateCommand();
 
-    public List<String[]> arguments();
+    public Map<String, String> getArguments();
 
 }

@@ -1,12 +1,13 @@
 package MainApp;
 
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public class Command extends DBAccess {
-    String command;
-    String flags[] = { "-d", "-t", "-delete", "-edit" };
-    String listOfCommands[] = { "ce", "ls", "rm", "find" };
-
+    private String command = "";
+    private String flags[] = { "-d", "-t", "-delete", "-edit" };
+    private String listOfCommands[] = { "ce", "ls", "rm", "find" };
+    public Event e = new Event();
     /*
      * Input
      * -> Command
@@ -26,18 +27,21 @@ public class Command extends DBAccess {
     }
 
     public Command(String c) {
-        this.command = c;
-        sanitizeCommand(this.command);
+        sanitizeCommand(c);
     }
 
     public void setCommand(String c) {
         sanitizeCommand(c);
-        this.command = c;
     }
 
-    // Gets rid of extra spaces
     public void sanitizeCommand(String c) {
-        c.replaceAll("\\s{2,}", " ");
+        this.command = "";
+        String text[] = c.split(" ");
+        for (int i = 0; i < text.length; i++) {
+            if (!(text[i].equals(" ") || text[i].equals(""))) {
+                this.command += (i == text.length - 1) ? text[i] : text[i] + " ";
+            }
+        }
     }
 
     public String getCommand() {
@@ -79,6 +83,9 @@ public class Command extends DBAccess {
         return false;
     }
 
+    /*
+     * Initialization of Objects should be refactored
+     */
     private boolean FindEventObject() {
         FindEvent obj = new FindEvent(this.command);
         boolean executable = obj.validateCommand();
@@ -113,11 +120,20 @@ public class Command extends DBAccess {
     }
 
     // Assuming input is like: <'argument'>
+    // Catch nullPointerException
     public String sanitizeArgument(String arg) {
-        return arg.substring(1, arg.length() - 1);
+        if (arg == null || arg.equals(""))
+            return null;
+
+        return (arg.charAt(0) == '\'' && arg.charAt(arg.length() - 1) == '\'') ? arg.substring(1, arg.length() - 1)
+                : null;
     }
 
     public boolean verifyTimeInput(String argument) {
+        if (argument == null || argument.length() == 0) {
+            return false;
+        }
+
         if (Pattern.matches("[0-9]{3,5}-[0-9]{3,5}", argument)) {
             int startTime = Integer.parseInt(argument.substring(0, argument.indexOf('-')));
             int endTime = Integer.parseInt(argument.substring(argument.indexOf('-') + 1, argument.length()));
@@ -184,6 +200,8 @@ public class Command extends DBAccess {
 
     // 'i' should be the index in front of the command
     public String getArgument(String text[], int i) {
+        if (text == null || text.length == 0 || i < 0)
+            return null;
         String joined = "";
         for (int j = i; j < text.length; j++) {
             if (isCommand(text[j]) || isFlag(text[j]))
@@ -198,7 +216,6 @@ public class Command extends DBAccess {
     }
 
     private boolean isFlag(String f) {
-        // String flag = sanitizeArgument(f);
         if (f.charAt(0) == '-') {
             for (int i = 0; i < this.flags.length; i++) {
                 if (this.flags[i].equals(f))

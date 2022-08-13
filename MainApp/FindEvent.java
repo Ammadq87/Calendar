@@ -26,16 +26,52 @@ public class FindEvent extends Command implements ICommand {
          * b. Edit Screen with options
          * c. more/less to be added
          */
+
         if (Boolean.parseBoolean(this.arguments.get("delete"))) {
-            super.executeQuery(createQuery("events"));
+            super.executeQuery(createQuery("events"), 0001);
             return;
         }
 
         List<String[]> l = super.getResultsFromQuery(createQuery("events"), "name-s", "startTime-i", "endTime-i",
                 "eventDate-s");
 
-        if (Boolean.parseBoolean(this.arguments.get("edit"))) {
+        if (Boolean.parseBoolean(this.arguments.get("edit"))
+                || !Boolean.parseBoolean(this.arguments.get("delete"))) {
             System.out.println(displayResults(l));
+            editScreen(l);
+        }
+
+        if (Boolean.parseBoolean(this.arguments.get("delete"))) {
+            System.out.println(this.arguments.get("name") + " has been deleted");
+        }
+    }
+
+    public void editScreen(List<String[]> list) {
+        m.outputMessage("Select an option from [1 - " + list.size() + "]", 'r');
+        Scanner input = new Scanner(System.in);
+        int option = Integer.parseInt(input.nextLine());
+        if (0 < option && option <= list.size()) {
+            String options[] = { "name", "start-time", "end-time", "date" };
+            System.out.println("What do you want to edit? ");
+            for (int i = 0; i < options.length; i++) {
+                System.out.println("[" + (i + 1) + "] " + options[i]);
+            }
+            option = Integer.parseInt(input.nextLine());
+            boolean found = false;
+            while (!found) {
+                if (0 < option && option <= options.length){
+                   found = true; 
+                }
+
+                if (!found) {
+                    System.out.println("Please select a valid option");
+                    option = Integer.parseInt(input.nextLine());
+                }
+            }
+
+            if (options[option].equals("name")){
+                
+            }
 
         }
     }
@@ -44,7 +80,7 @@ public class FindEvent extends Command implements ICommand {
         String display = "";
 
         if (queryResult == null || queryResult.size() == 0)
-            display = "No Results :(";
+            return "No Results :(";
 
         for (int i = 0; i < queryResult.size(); i++) {
             display += "[" + (i + 1) + "] ";
@@ -109,31 +145,4 @@ public class FindEvent extends Command implements ICommand {
 
         return args;
     }
-
-    @Override
-    public List<String[]> arguments() {
-        if (this.command == null || this.command.length() == 0) {
-            return null;
-        }
-
-        String text[] = command.split(" ");
-        List<String[]> params = new ArrayList<String[]>();
-
-        String name[] = { "n", sanitizeArgument(getArgument(text, 2)) };
-        params.add(name);
-
-        for (int i = 1; i < text.length; i++) {
-            if (text[i].equals("-delete")) {
-                String time[] = { "delete", sanitizeArgument(getArgument(text, i + 1)) };
-                params.add(time);
-            } else if (text[i].equals("-edit")) {
-                String date[] = { "edit", sanitizeArgument(getArgument(text, i + 1)) };
-                params.add(date);
-            }
-        }
-
-        return params;
-
-    }
-
 }
